@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-deploy
+  namespace: tfm-pre-agat-prog
+spec:
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      containers:
+      - name: front
+        image: agatalba/tfm-mca-filemanagement-front:0.0.1
+        env:
+          - name: GATEWAY_HOST
+            value: gateway-service      
+          - name: GATEWAY_PORT
+            value: "8085"
+          - name: USERS_HOST
+            value: oauth2
+          - name: USERS_PORT 
+            value: "8081"
+        ports:
+          - containerPort: 8090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-service
+  namespace: tfm-pre-agat-prog
+spec:
+  type: ClusterIP
+  selector:
+    app: front
+  ports:
+  - name: front-port
+    port: 8090

@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cdc-service-svc
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: cdc-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cdc-service
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cdc-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cdc-service
+    spec:
+      containers:
+        - name: cdc-service
+          image: eventuateio/eventuate-cdc-service:0.12.0.RELEASE
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local/eventuate
+            - name: SPRING_DATASOURCE_USERNAME
+              value: mysqluser
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: mysqlpw
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: com.mysql.jdbc.Driver
+            - name: EVENTUATELOCAL_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-service:29092
+            - name: EVENTUATELOCAL_ZOOKEEPER_CONNECTION_STRING
+              value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local:2181
+            - name: EVENTUATELOCAL_CDC_DB_USER_NAME
+              value: root
+            - name: EVENTUATELOCAL_CDC_DB_PASSWORD
+              value: rootpassword
+            - name: EVENTUATELOCAL_CDC_READER_NAME
+              value: MySqlReader
+            - name: EVENTUATELOCAL_CDC_OFFSET_STORE_KEY
+              value: MySqlBinlog
+            - name: EVENTUATELOCAL_CDC_MYSQL_BINLOG_CLIENT_UNIQUE_ID
+              value: "1234567890"
+            - name: EVENTUATELOCAL_CDC_READ_OLD_DEBEZIUM_DB_OFFSET_STORAGE_TOPIC
+              value: "false"
+            - name: EVENTUATE_OUTBOX_ID
+              value: "1"

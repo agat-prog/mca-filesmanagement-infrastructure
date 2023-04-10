@@ -1,0 +1,20 @@
+name: workflow4
+
+on: 
+  push :
+    branches:
+      - 'release/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Commit to release"
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      - run: mvn -Dtest="es.urjc.code.daw.library.unitary.**" test
+      - run: mvn -Dtest="es.urjc.code.daw.library.e2e.rest.**" test

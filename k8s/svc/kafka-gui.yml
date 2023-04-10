@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-gui-service
+  labels:
+    name: kafka-gui
+  annotations:
+    dev.okteto.com/auto-ingress: 'false'
+spec:
+  ports:
+  - port: 9088
+    targetPort: 8080
+    protocol: TCP
+    name: kafka-gui-port
+  selector:
+    app: kafka-gui
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-gui-deploy
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kafka-gui
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka-gui
+    spec:
+      containers:
+        - name: kafka-gui
+          image: quay.io/cloudhut/kowl:master-1d07695
+          env:
+            - name: KAFKA_BROKERS
+              value: kafka-service.tfm-pre-agat-prog.svc.cluster.local:29092
+          ports:
+            - containerPort: 8080

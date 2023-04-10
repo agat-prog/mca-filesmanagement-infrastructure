@@ -1,0 +1,162 @@
+{
+	"info": {
+		"_postman_id": "7d3bae0a-a93e-4e62-99ce-538089e5f800",
+		"name": "TFM-File-Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Create File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/agat/Antonio/urjc/Presentación.docx"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{FILES_END_POINT}}/api/files",
+							"host": [
+								"{{FILES_END_POINT}}"
+							],
+							"path": [
+								"api",
+								"files"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "echo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "065140eb-dc57-4c9e-839f-0dddeb0f78d6",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{FILES_END_POINT}}/api/files/echo?texto=hola",
+							"host": [
+								"{{FILES_END_POINT}}"
+							],
+							"path": [
+								"api",
+								"files",
+								"echo"
+							],
+							"query": [
+								{
+									"key": "texto",
+									"value": "hola"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Oauth2-Autentication",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password-oauth",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "cliente",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "password",
+							"value": "secret",
+							"type": "default"
+						},
+						{
+							"key": "username",
+							"value": "user",
+							"type": "default"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{OAUTH2_END_POINT}}/oauth/token",
+					"host": [
+						"{{OAUTH2_END_POINT}}"
+					],
+					"path": [
+						"oauth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "FILES_END_POINT",
+			"value": "http://localhost:8080",
+			"type": "default"
+		},
+		{
+			"key": "OAUTH2_END_POINT",
+			"value": "http://localhost:8081",
+			"type": "default"
+		}
+	]
+}

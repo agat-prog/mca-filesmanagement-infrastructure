@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2
+  namespace: tfm-pre-agat-prog
+spec:
+  selector:
+    matchLabels:
+      app: oauth2
+  template:
+    metadata:
+      labels:
+        app: oauth2
+    spec:
+      containers:
+      - name: oauth2
+        image: agatalba/tfm-mca-filemanagement-oauth2:0.0.1
+        env:
+        - name: DB_HOST
+          value: mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local
+        - name: DB_USER
+          value: root
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: files-secrets
+              key: mysqlpass
+        ports:
+          - containerPort: 8081
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2
+  namespace: tfm-pre-agat-prog
+spec:
+  type: ClusterIP
+  selector:
+    app: oauth2
+  ports:
+  - name: oauth2-port
+    port: 8081

@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: files-ingress
+spec:
+  rules:
+  - host: files-tfm-prod-agat-prog.cloud.okteto.net
+    http:
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: front-service
+              port:
+                number: 8090

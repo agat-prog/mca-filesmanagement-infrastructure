@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-deploy
+  namespace: agat-prog
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jenkins
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:2.375.1-lts-jdk17
+          env:
+            - name: DOCKER_HOST
+              value: tcp://docker:2376
+          ports:
+            - containerPort: 8100
+          volumeMounts:
+            - mountPath: /var/jenkins_home
+              name: jenkins-claim
+      volumes:
+        - name: jenkins-claim
+          persistentVolumeClaim:
+            claimName: jenkins-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  namespace: agat-prog
+  labels:
+    app: jenkins
+spec:
+  clusterIP: None
+  ports:
+    - port: 8100
+      targetPort: 8100
+      protocol: TCP
+  type: LoadBalancer
+  selector:
+    app: jenkins
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: jenkins-claim
+  name: jenkins-claim
+  namespace: agat-prog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+status: {}

@@ -1,0 +1,22 @@
+name: workflow3
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Nightly test"
+      - uses: actions/checkout@v2
+        with:
+          ref: develop
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+      - run: mvn -Dtest="es.urjc.code.daw.library.unitary.**" test
+      - run: mvn -Dtest="es.urjc.code.daw.library.e2e.rest.**" test
+      - run: mvn -Dtest="es.urjc.code.daw.library.e2e.selenium.**" test

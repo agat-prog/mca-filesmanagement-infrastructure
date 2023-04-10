@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docs-deploy
+  namespace: tfm-pre-agat-prog
+spec:
+  selector:
+    matchLabels:
+      app: docs
+  template:
+    metadata:
+      labels:
+        app: docs
+    spec:
+      containers:
+      - name: docs
+        image: agatalba/tfm-mca-filemanagement-docs:0.0.1
+        env:
+          - name: DOCS_PATH
+            value: /tmp/docs
+          - name: DB_HOST
+            value: mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: DB_USER
+            value: root
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: files-secrets
+                key: mysqlpass
+          - name: KAFKA_HOST
+            value: kafka-service
+          - name: KAFKA_PORT
+            value: "29092"
+          - name: ZOOKEEPER_HOST
+            value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: ZOOKEEPER_PORT
+            value: "2181"
+        ports:
+          - containerPort: 8083
+        volumeMounts:
+          - mountPath: /tmp/docs
+            name: docs-claim
+      volumes:
+        - name: docs-claim
+          persistentVolumeClaim:
+            claimName: docs-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: docs-claim
+  name: docs-claim
+  namespace: tfm-pre-agat-prog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs-service
+  namespace: tfm-pre-agat-prog
+spec:
+  type: ClusterIP
+  selector:
+    app: docs
+  ports:
+  - name: docs-port
+    port: 8083

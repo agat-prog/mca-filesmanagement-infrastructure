@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bpm-deploy
+  namespace: tfm-pre-agat-prog
+spec:
+  selector:
+    matchLabels:
+      app: bpm
+  template:
+    metadata:
+      labels:
+        app: bpm
+    spec:
+      containers:
+      - name: bpm
+        image: agatalba/tfm-mca-filemanagement-bpm:0.0.1
+        env:
+          - name: DB_HOST
+            value: mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: DB_USER
+            value: root
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: files-secrets
+                key: mysqlpass
+          - name: KAFKA_HOST
+            value: kafka-service
+          - name: KAFKA_PORT
+            value: "29092"
+          - name: ZOOKEEPER_HOST
+            value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: ZOOKEEPER_PORT
+            value: "2181"
+          - name: USERS_HOST
+            value: oauth2
+          - name: USERS_PORT
+            value: "8081"
+        ports:
+          - containerPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bpm-service
+  namespace: tfm-pre-agat-prog
+spec:
+  type: ClusterIP
+  selector:
+    app: bpm
+  ports:
+  - name: bpm-port
+    port: 8082

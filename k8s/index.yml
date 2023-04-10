@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: index-deploy
+  namespace: tfm-pre-agat-prog
+spec:
+  selector:
+    matchLabels:
+      app: index
+  template:
+    metadata:
+      labels:
+        app: index
+    spec:
+      containers:
+      - name: index
+        image: agatalba/tfm-mca-filemanagement-index:0.0.1
+        env:
+          - name: MONGODB_HOST
+            value: mongodb-service.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: MONGODB_PORT
+            value: "27017"
+          - name: MONGODB_USER
+            value: root
+          - name: MONGODB_PASSWORD
+            value: password
+          - name: MONGODB_DBNAME
+            value: INDEX
+          - name: DB_HOST
+            value: mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: DB_USER
+            value: root
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: files-secrets
+                key: mysqlpass
+          - name: KAFKA_HOST
+            value: kafka-service
+          - name: KAFKA_PORT
+            value: "29092"
+          - name: ZOOKEEPER_HOST
+            value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local
+          - name: ZOOKEEPER_PORT
+            value: "2181"
+          - name: USERS_HOST
+            value: oauth2
+          - name: USERS_PORT
+            value: "8081"
+        ports:
+          - containerPort: 8084
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: index-service
+  namespace: tfm-pre-agat-prog
+spec:
+  type: ClusterIP
+  selector:
+    app: index
+  ports:
+  - name: index-port
+    port: 8084

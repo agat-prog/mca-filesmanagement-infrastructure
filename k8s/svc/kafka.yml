@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+  labels:
+    app: kafka
+spec:
+  ports:
+    - port: 9092
+      targetPort: 9092
+      protocol: TCP
+      name: kafka-9092-port
+    - port: 29092
+      targetPort: 29092
+      protocol: TCP
+      name: kafka-29092-port
+  type: ClusterIP
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-deploy
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: kafka
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: confluentinc/cp-kafka:5.2.4
+          env:
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: LC://kafka-service:29092,LX://kafka-service:9092
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: LC:PLAINTEXT,LX:PLAINTEXT
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: LC
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local:2181
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+          ports:
+            - containerPort: 9092
+            - containerPort: 29092
+          volumeMounts:
+            - mountPath: /var/lib/kafka
+              name: kafka-claim
+      volumes:
+        - name: kafka-claim
+          persistentVolumeClaim:
+            claimName: kafka-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: kafka-claim
+  name: kafka-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}

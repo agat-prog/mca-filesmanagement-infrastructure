@@ -1,0 +1,26 @@
+name: Test Unitary and Rest - PR on develop & push on release
+
+on:
+  pull_request:
+    branches: 
+      - develop
+      
+  workflow_dispatch:
+
+jobs:
+  test-unitary-rest:
+    name: Run unitary and rest test
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Clone repository
+      uses: actions/checkout@v2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+    - name: Run unitary test
+      run: mvn -B -Dtest=*UnitaryTest test
+    - name: Run REST test
+      run: mvn -B -Dtest=*RestTest test
+    

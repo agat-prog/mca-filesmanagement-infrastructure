@@ -1,0 +1,207 @@
+version: '3.5'
+services:
+  mongodb:
+    image: mongo:5.0.6-focal
+    ports:
+      - 27017:27017
+    volumes:
+      - /opt/volumes/mongodb:/data/db
+    restart: on-failure
+
+  mysqldb:
+    image: eventuateio/eventuate-tram-sagas-mysql:0.18.0.RELEASE
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+    volumes:
+      - /opt/volumes/mysql:/var/lib/mysql
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.4
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: "confluentinc/cp-kafka:5.2.4"
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: LC://kafka:29092,LX://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: LC://kafka:29092,LX://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LC:PLAINTEXT,LX:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LC
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_HEAP_OPTS: -Xmx192m
+
+  cdc-service:
+    image: eventuateio/eventuate-cdc-service:0.12.0.RELEASE
+    ports:
+      - "8099:8080"
+    depends_on:
+      - mysqldb
+      - kafka
+      - zookeeper
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb/eventuate
+      SPRING_DATASOURCE_USERNAME: mysqluser
+      SPRING_DATASOURCE_PASSWORD: mysqlpw
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.jdbc.Driver
+      EVENTUATELOCAL_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EVENTUATELOCAL_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
+      EVENTUATELOCAL_CDC_DB_USER_NAME: root
+      EVENTUATELOCAL_CDC_DB_PASSWORD: rootpassword
+      EVENTUATELOCAL_CDC_READER_NAME: MySqlReader
+      EVENTUATELOCAL_CDC_OFFSET_STORE_KEY: MySqlBinlog
+      EVENTUATELOCAL_CDC_MYSQL_BINLOG_CLIENT_UNIQUE_ID: 1234567890
+      EVENTUATELOCAL_CDC_READ_OLD_DEBEZIUM_DB_OFFSET_STORAGE_TOPIC: "false"
+      EVENTUATE_OUTBOX_ID: 1
+      JAVA_OPTS: -Xmx64m
+
+  zipkin:
+    image: openzipkin/zipkin:2.21
+    ports:
+      - "9411:9411"
+    environment:
+      JAVA_OPTS: -Xmx64m
+
+  kafka-gui:
+    image: quay.io/cloudhut/kowl:master-1d07695
+    ports:
+      - 9088:8080
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKERS: kafka:29092
+
+  oauth2:
+    image: agatalba/tfm-mca-filemanagement-oauth2:0.0.1
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysqldb
+    environment:
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+    restart: on-failure
+
+  index:
+    image: agatalba/tfm-mca-filemanagement-index:0.0.1
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mysqldb
+      - cdc-service
+      - kafka
+      - mongodb
+    environment:
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+      MONGODB_USER: root
+      MONGODB_PASSWORD: password
+      MONGODB_DBNAME: INDEX
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 29092
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+    restart: on-failure
+    
+  docs:
+    image: agatalba/tfm-mca-filemanagement-docs:0.0.1
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysqldb
+      - cdc-service
+      - kafka
+    environment:
+      DOCS_PATH: /tmp/docs
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 29092
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+    volumes:
+      - /home/agat/temp:/tmp/docs     
+    restart: on-failure
+    
+  bpm:
+    image: agatalba/tfm-mca-filemanagement-bpm:0.0.1
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysqldb
+      - cdc-service
+      - kafka
+    environment:
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 29092
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      USERS_HOST: oauth2
+      USERS_PORT: 8081
+    restart: on-failure
+    
+  files:
+    image: agatalba/tfm-mca-filemanagement-files:0.0.1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+      - cdc-service
+      - kafka
+    environment:
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 29092
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
+      USERS_HOST: oauth2
+      USERS_PORT: 8081
+    restart: on-failure
+
+  gateway:
+    image: agatalba/tfm-mca-filemanagement-gateway:0.0.1
+    ports:
+      - "8085:8085"
+    environment:
+      FILES_HOST: files
+      FILES_PORT: 8080
+      USERS_HOST: oauth2
+      USERS_PORT: 8081
+      BPM_HOST: bpm
+      BPM_PORT: 8082
+      DOCS_HOST: docs
+      DOCS_PORT: 8083
+      INDEX_HOST: index
+      INDEX_PORT: 8084
+    restart: on-failure
+    
+  front:
+    image: agatalba/tfm-mca-filemanagement-front:0.0.1
+    ports:
+      - "8090:8090"
+    environment:
+      GATEWAY_HOST: gateway
+      GATEWAY_PORT: 8085
+      USERS_HOST: oauth2
+      USERS_PORT: 8081
+    restart: on-failure

@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  jenkins:
+    image: jenkins/jenkins:2.375.1-lts-jdk17
+    container_name: jenkins-container
+    ports:
+      - 8100:8080
+      - 50000:50000
+    volumes:
+      - /opt/volumes/jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/volumes/jenkins-certs:/certs/client:ro
+    restart: on-failure
+networks:
+  default:
+    external: true
+    name: jenkins
