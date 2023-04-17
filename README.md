@@ -2,7 +2,7 @@
 
 <h1> Introducción </h1>
 
-La aplicación desarrollada corresponde con un gestor de expedientes que dispone de <b>documentación asociada</b> a estos y que está sujeta a un flujo de tramitación <b>(BPM)</b>. Este flujo de tramitación es una herramienta horizontal a una organización en la que pueden integrarse distintas aplicaciones, que pueden tramitar, en un determinado momento, el flujo correspondiente, de esta manera se puede orquestar un proceso completo en la gestión de un expediente en la que pueden verse involucrados varias aplicaciones o servicios. 
+<p>La aplicación desarrollada corresponde con un gestor de expedientes que dispone de <b>documentación asociada</b> a estos y que está sujeta a un flujo de tramitación <b>(BPM)</b>. Este flujo de tramitación es una herramienta horizontal a una organización en la que pueden integrarse distintas aplicaciones, que pueden tramitar, en un determinado momento, el flujo correspondiente, de esta manera se puede orquestar un proceso completo en la gestión de un expediente en la que pueden verse involucrados varias aplicaciones o servicios. </p>
 
 <h1> Arquitectura </h1>
 La aplicación descrita con anterioridad ha sido implementada usando una arquitectura basada en microservicios y un diseño basado en eventos. Son 7 los microservicios desarrollados para la aplicación Filemanagement, representados con un hexágono en el siguiente diagrama:
