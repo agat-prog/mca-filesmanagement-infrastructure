@@ -1,0 +1,2 @@
+La documentación técnica se encuentra en la siguiente URL, hasta que se mueva al repositorio definitivo:
+https://github.com/agat-prog/mca-filesmanagement-infrastructure
