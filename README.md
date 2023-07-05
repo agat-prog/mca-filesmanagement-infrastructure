@@ -1,4 +1,4 @@
-# TFM 2021/2022 Filesmanagement
+# TFM 2021/2022 Filesmanagement (Gestor de Expedientes)
 
 <h1> Introducción </h1>
 
@@ -139,7 +139,15 @@ Una posible configuración de jobs es la utilizada en este TFM que tiene las sig
 -	Configurar el repositorio de git: previamente hay que generar las credenciales y guardarlas en Jenkins.
 -	Asignar la ubicación relativa al proyecto donde se encuentra el fichero Jenkinsfile.
 -	Configurar tiempo para el poll que conecta Jenkins con el repositorio
+-	El despliegue de la aplicación en Okteto se realiza mediante la ejecución del contenedor de una imagen (dtzar/helm-kubectl). Para configurar las credenciales es necesario realizar un mapeo del fichero ".kube" que genera la instalción de la consola de Okteto 
 
 Al finalizar la configuración, Jenkins detectará cualquier cambio en alguna de las ramas del repositorio y lanzará el siguiente flujo, común para todos los microservicios:
 
 ![Flujo CD/CI](./docs/tfm-flujo-cd-ci-boxes.png)
+
+<h2>Documentos</h2>
+En el siguiente link podrá descargar la presentación del TFM de este proyecto en dos formatos distintos: 
+
+![Presentación PDF](./docs/Presentación-TFM-FIles_management_agat.pdf)
+
+![Presentación PPT](./docs/Presentación-TFM-FIles_management_agat.pptx)
