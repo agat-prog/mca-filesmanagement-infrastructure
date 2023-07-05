@@ -148,6 +148,6 @@ Al finalizar la configuración, Jenkins detectará cualquier cambio en alguna de
 <h2>Documentos</h2>
 En el siguiente link podrá descargar la presentación del TFM de este proyecto en dos formatos distintos: 
 
-![Presentación PDF](./docs/Presentación-TFM-FIles_management_agat.pdf)
+[Presentación PDF](./docs/Presentación-TFM-FIles_management_agat.pdf)
 
-![Presentación PPT](./docs/Presentación-TFM-FIles_management_agat.pptx)
+[Presentación PPT](./docs/Presentación-TFM-FIles_management_agat.pptx)
