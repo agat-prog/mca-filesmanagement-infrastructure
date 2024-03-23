@@ -32,7 +32,7 @@ spec:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local/eventuate
+              value: jdbc:mysql://mysql-service/eventuate
             - name: SPRING_DATASOURCE_USERNAME
               value: mysqluser
             - name: SPRING_DATASOURCE_PASSWORD
@@ -42,7 +42,7 @@ spec:
             - name: EVENTUATELOCAL_KAFKA_BOOTSTRAP_SERVERS
               value: kafka-service:29092
             - name: EVENTUATELOCAL_ZOOKEEPER_CONNECTION_STRING
-              value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local:2181
+              value: zookeeper:2181
             - name: EVENTUATELOCAL_CDC_DB_USER_NAME
               value: root
             - name: EVENTUATELOCAL_CDC_DB_PASSWORD

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-deploy
+spec:
+  selector:
+    matchLabels:
+      app: angular
+  template:
+    metadata:
+      labels:
+        app: angular
+    spec:
+      containers:
+      - name: angular
+        image: agatalba/tfm-mca-filemanagement-angular:1.0.2
+        ports:
+          - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-service
+spec:
+  type: ClusterIP
+  selector:
+    app: angular
+  ports:
+  - name: angular-port
+    port: 80

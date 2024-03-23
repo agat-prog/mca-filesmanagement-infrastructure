@@ -4,9 +4,10 @@ metadata:
   name: zookeeper
   labels:
     name: zookeeper
-  annotations:
-    dev.okteto.com/auto-ingress: 'false'
+#  annotations:
+#    dev.okteto.com/auto-ingress: 'false'
 spec:
+  type: ClusterIP
   ports:
   - port: 2181
     targetPort: 2181
@@ -14,7 +15,6 @@ spec:
     name: zookeeper-port
   selector:
     app: zookeeper
-  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -49,16 +49,26 @@ spec:
             claimName: zookeeper-claim
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeper-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 3Gi  
+  hostPath:
+    path: /host/zookeeper            
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  creationTimestamp: null
-  labels:
-    io.kompose.service: zookeeper-claim
   name: zookeeper-claim
 spec:
+  storageClassName: standar-rwo
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
-status: {}
+      storage: 3Gi

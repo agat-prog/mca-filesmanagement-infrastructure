@@ -1,14 +1,12 @@
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mysql-deploy
 spec:
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: mysql
+  serviceName: "mysql"      
   replicas: 1
   template:
     metadata:
@@ -47,28 +45,36 @@ metadata:
   labels:
     app: mysql
 spec:
-  clusterIP: None
+  type: ClusterIP
   ports:
     - port: 3306
       targetPort: 3306
       protocol: TCP
-      nodePort: 30003
       name: mysql-port
-  type: LoadBalancer
   selector:
     app: mysql
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 500Mi  
+  hostPath:
+    path: /host/mysql
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  creationTimestamp: null
-  labels:
-    io.kompose.service: mysql-claim
   name: mysql-claim
 spec:
+  storageClassName: standar-rwo
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
-status: {}
+      storage: 500Mi

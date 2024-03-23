@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-gui-service
+  labels:
+    name: kafka-gui
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: kafka-gui-port
+  selector:
+    app: kafka-gui
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-gui-deploy
+spec:
+  selector:
+    matchLabels:
+      app: kafka-gui
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka-gui
+    spec:
+      containers:
+      - name: kafka-gui
+        image: provectuslabs/kafka-ui:53a6553765a806eda9905c43bfcfe09da6812035
+        env:
+          - name: DYNAMIC_CONFIG_ENABLED
+            value: "false"
+          - name: KAFKA_CLUSTERS_0_NAME
+            value: kafka-files-dev
+          - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+            value: kafka-service:29092
+        ports:
+        - containerPort: 8080
+#        volumeMounts:
+#          - mountPath: /etc/kafkaui
+#            name: kafka-ui-claim
+#      volumes:
+#        - name: kafka-ui-claim
+#          hostPath:
+#            path: /tmp/kafkaui
+#            type: Directory
+            
+#      volumes:
+#        - name: kafka-ui-claim
+#          persistentVolumeClaim:
+#            claimName: kafka-ui-claim            
+#---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: kafka-ui-pv
+#spec:
+#  storageClassName: standar-rwo
+#  accessModes:
+#    - ReadWriteOnce
+#  capacity:
+#    storage: 1Mi  
+#  hostPath:
+#    path: /host                
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: kafka-ui-claim
+#spec:
+#  storageClassName: standar-rwo
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 1Mi

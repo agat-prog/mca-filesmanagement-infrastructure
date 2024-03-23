@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-deploy
+spec:
+  selector:
+    matchLabels:
+      app: jenkins
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:2.375.1-lts-jdk17
+          env:
+            - name: DOCKER_HOST
+              value: tcp://docker:2376
+          ports:
+            - containerPort: 8080
+            - containerPort: 50000
+          volumeMounts:
+            - mountPath: /var/jenkins_home
+              name: jenkins-home-volume
+            - mountPath: /certs/client:ro
+              name: jenkins-certs-volume              
+            - mountPath: /var/run/docker.sock
+              name: jenkins-docker-sock-volume
+      volumes:
+        - name: jenkins-home-volume
+          persistentVolumeClaim:
+            claimName: jenkins-data-pvclaim
+        - name: jenkins-certs-volume
+          persistentVolumeClaim:
+            claimName: jenkins-certs-pvclaim
+        - name: jenkins-docker-sock-volume
+          persistentVolumeClaim:
+            claimName: jenkins-docker-sock-pvclaim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  labels:
+    app: jenkins
+spec:
+  type: ClusterIP
+  ports:
+    - name: jenkins-8100
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: jenkins-50000
+      port: 50000
+      targetPort: 50000
+      protocol: TCP
+  selector:
+    app: jenkins

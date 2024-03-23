@@ -4,26 +4,31 @@ metadata:
   name: cluster-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
     #nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
+  tls:
+    - secretName: dev-ops-tls
+      hosts:
+        - '*.dev-ops'
   rules:
-   - host: kafka-ui.files.dev
+   - host: jenkins.dev-ops
      http:
       paths:
         - path: /(.*)
           pathType: ImplementationSpecific
           backend:
             service:
-              name: kafka-gui-service
+              name: jenkins-service
               port:
                 number: 8080
-   - host: front.files.dev
+   - host: nexus.dev-ops
      http:
-      paths:                    
+      paths:
         - path: /(.*)
           pathType: ImplementationSpecific
           backend:
             service:
-              name: front-service
+              name: nexus-service
               port:
-                number: 8090                                     
+                number: 8081

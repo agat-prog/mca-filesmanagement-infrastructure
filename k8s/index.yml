@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: index-deploy
-  namespace: tfm-pre-agat-prog
 spec:
   selector:
     matchLabels:
@@ -17,7 +16,7 @@ spec:
         image: agatalba/tfm-mca-filemanagement-index:0.0.1
         env:
           - name: MONGODB_HOST
-            value: mongodb-service.tfm-pre-svc-agat-prog.svc.cluster.local
+            value: mongodb-service
           - name: MONGODB_PORT
             value: "27017"
           - name: MONGODB_USER
@@ -27,7 +26,7 @@ spec:
           - name: MONGODB_DBNAME
             value: INDEX
           - name: DB_HOST
-            value: mysql-service.tfm-pre-svc-agat-prog.svc.cluster.local
+            value: mysql-service
           - name: DB_USER
             value: root
           - name: DB_PASSWORD
@@ -40,7 +39,7 @@ spec:
           - name: KAFKA_PORT
             value: "29092"
           - name: ZOOKEEPER_HOST
-            value: zookeeper.tfm-pre-svc-agat-prog.svc.cluster.local
+            value: zookeeper
           - name: ZOOKEEPER_PORT
             value: "2181"
           - name: USERS_HOST
@@ -54,7 +53,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: index-service
-  namespace: tfm-pre-agat-prog
 spec:
   type: ClusterIP
   selector:

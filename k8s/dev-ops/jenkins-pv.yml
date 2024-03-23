@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-data-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 8Gi  
+  hostPath:
+    path: /host/jenkins/jenkins-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-certs-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi  
+  hostPath:
+    path: /host/jenkins/jenkins-certs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-docker-sock-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi  
+  hostPath:
+    path: /var/run/docker.sock

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artifactory-deploy
+spec:
+  selector:
+    matchLabels:
+      app: artifactory
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: artifactory
+    spec:
+      containers:
+        - name: artifactory
+          image: releases-docker.jfrog.io/jfrog/artifactory-oss:latest
+          ports:
+            - containerPort: 8081
+            - containerPort: 8082
+          volumeMounts:
+            - mountPath: /var/opt/jfrog/artifactory
+              name: artifactory-volume
+      volumes:
+        - name: artifactory-volume
+          persistentVolumeClaim:
+            claimName: artifactory-pvclaim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: artifactory-service
+  labels:
+    app: artifactory
+spec:
+  type: ClusterIP
+  ports:
+    - name: artifactory-8081
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+    - name: artifactory-8082
+      port: 8082
+      targetPort: 8082
+      protocol: TCP
+  selector:
+    app: artifactory            
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: artifactory-pv
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi  
+  hostPath:
+    path: /host/artifactory/var
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: artifactory-pvclaim
+spec:
+  storageClassName: standar-rwo
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+#/opt/volumes/artifactory/var/:/var/opt/jfrog/artifactory
